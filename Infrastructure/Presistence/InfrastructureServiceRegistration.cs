@@ -1,0 +1,47 @@
+﻿using DomainLayer.Contracts;
+using DomainLayer.Models.IdentityModule;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using presentation.Data.Contexts;
+using Presistence.Identity;
+using Presistence.Repositories;
+using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Presistence
+{
+    public static class InfrastructureServiceRegistration
+    {
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection Services,IConfiguration Configuration)
+        {
+            Services.AddDbContext<StoreDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                //options.UseLazyLoadingProxies();
+            });
+            Services.AddScoped<IDataSeeding, DataSeeding>();
+            Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            Services.AddScoped<IBasketRepository, BasketRepository>();
+            Services.AddSingleton<IConnectionMultiplexer>((_) =>
+            {
+                return ConnectionMultiplexer.Connect(Configuration.GetConnectionString("RedisConnection"));
+            });
+            Services.AddDbContext<StoreIdentityContext>(options=>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection"));
+            });
+
+            Services.AddIdentityCore<ApplicationUser>()
+                    .AddRoles<IdentityRole>()
+                    .AddEntityFrameworkStores<StoreIdentityContext>();
+            Services.AddScoped<ICacheRepostiory, CacheRepostiory>();
+            return Services;
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿using DomainLayer.Models.OrderModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Service.Specifications
+{
+    internal class OrderByPaymentIntentIdSpecification : BaseSpecification<Order,Guid>
+    {
+        public OrderByPaymentIntentIdSpecification(string id) : base(O=>O.PaymentIntentId==id)
+        {
+            
+        }
+    }
+}
